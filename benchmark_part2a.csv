@@ -1,1 +1,11 @@
 question, answer, difficulty
+"How do people at American University feel about their Panera?", "negative", "medium"
+"At Brown University, what is the public sentiment towards the Political Theory Project?", "negative", "medium"
+"How do people at Emory University feel about the vibe of the clubs?", "negative", "hard"
+"At Marquette University, how do students feel about the availability of places to nap on campus?", "neutral", "hard"
+"How do students at Northwestern University feel about the dining halls?", "negative", "easy"
+"At Pomona College, what is the overall opinion of the party scene?", "neutral", "medium"
+"How do students of Kent State Univeristy feel about Ms. Yu Li?", "positive", "medium"
+"What is the general opinion on Hamilton College's computer science program?", "positive", "medium"
+"How does the community at Appalachian State University feel about the incident with Wey Hall?", "negative", "easy"
+"At Auburn University, how do people feel about college football?", "positive", "medium"
