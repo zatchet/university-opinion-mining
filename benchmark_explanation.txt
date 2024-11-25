@@ -1,9 +1,9 @@
-benchmark_questions.csv:
+subreddit_guess_benchmark.csv:
 
 This is an LLM-generated dataset (we used an existing dataset of university names and their subreddits) that tests whether the model can correctly output the name of the subreddit for the given question. 
 We will fine-tune a model to be really good at this. An untuned LLM is ok at this (it gets it right less than 50% of the time), but it will need to be better.
 
-benchmark_part2.csv:
+final_llm_benchmark.csv:
 
 This can be thought of as the end-to-end test for our system. The question is the input, and the sentiment (positive, neutral, negative) is the output. An untuned LLM 
 that does no RAG will obviously not be very good at this.
