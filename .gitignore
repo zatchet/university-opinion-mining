@@ -1,3 +1,8 @@
 llmfinalproj/
 *venv/
+secrets.csv
+finetuned/
+
 .DS_Store
+*.cpython*
+*model/

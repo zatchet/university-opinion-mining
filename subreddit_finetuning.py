@@ -1,72 +1,71 @@
-import os
-from openai import OpenAI
+import torch
+from datasets import load_dataset, Dataset
+from transformers import AutoModelForCausalLM
 import pandas as pd
-from tqdm import tqdm
-
-# initializing openai configuration
-BASE_URL = "http://199.94.61.113:8000/v1/" # os.getenv('CS4973_BASE_URL')
-API_KEY=api_key = "bengani.k@northeastern.edu:8H4rX1jbx2FxmFQzOXev" # os.getenv('CS4973_API_KEY')
-client = OpenAI(base_url=BASE_URL, api_key=API_KEY)
-
-# initializing system prompt for question generation
-SYSTEM_PROMPT = '''
-Come up with a hypothetical question that would be relevant to the university given. 
-Return only the question. Be sure to include the name of the university in the question.
-
-Examples:
-Question: Boston Univeristy
-Answer: How do people feel about the dorms at Boston University?
-Question: University of Washington
-Answer: At the University of Washington, do people like the quality of the food?
-'''
-
-# convert college subreddits csv to dataframe
-df = pd.read_csv('csv_files/college_subreddits.csv')
-df.drop(columns=['location'], inplace=True)
+from trl import SFTConfig, SFTTrainer
 
 
-def generate_for_benchmark():
-    # generating 1 question per college subreddit
-    benchmark_df = pd.DataFrame(columns=['subreddit', 'question'])
-    for index, row in df.iterrows():
-        messages = [{'role': 'system', 'content': SYSTEM_PROMPT}]
-        messages.append({'role': 'user', 'content': row['name']})
+def fine_tune_model():
+    print("extracting data")
+    data_dict = get_data()
 
-        resp = client.chat.completions.create(
-            messages = messages,
-            model = "meta-llama/Meta-Llama-3.1-8B-Instruct",
-            temperature=0.9,
-            max_tokens=500,
-        )
-        resp = resp.choices[0].message.content
-        benchmark_df.loc[len(benchmark_df)] = {'subreddit': row['subreddit'], 'question': resp}
-        
-    # post-processing of questions and saving to file
-    benchmark_df.drop_duplicates(subset=['question'], inplace=True)
-    benchmark_df.to_csv('csv_files/subreddit_finetuning_benchmark.csv', index=False)
+    # set configurations
+    sft_config = SFTConfig(
+        dataset_text_field="content",
+        max_seq_length=2048,
+        output_dir="finetuned",
+        learning_rate=3e-05,
+        lr_scheduler_type="cosine",
+        num_train_epochs=5,
+        per_device_train_batch_size=8,
+        bf16=True,
+        logging_steps=100,
+    )
+
+    print("loading model")
+    # load model
+    model = AutoModelForCausalLM.from_pretrained(
+        "/scratch/bchk/aguha/models/llama3p2_1b_base",
+        torch_dtype=torch.bfloat16,
+        # attn_implementation="flash_attention_2"
+    ).to("cuda")
     
-    return benchmark_df
-
-
-def generate_for_finetuning():
-    # generating 5 questions per college subreddit
-    questions_df = pd.DataFrame(columns=['subreddit', 'question'])
-    for index, row in tqdm(df.iterrows()):
-        messages = [{'role': 'system', 'content': SYSTEM_PROMPT}]
-        messages.append({'role': 'user', 'content': row['name']})
-
-        for _ in range(5):
-            resp = client.chat.completions.create(
-                messages = messages,
-                model = "meta-llama/Meta-Llama-3.1-8B-Instruct",
-                temperature=0.9,
-                max_tokens=500,
-            )
-            resp = resp.choices[0].message.content
-            questions_df.loc[len(questions_df)] = {'subreddit': row['subreddit'], 'question': resp}
-
-    # post-processing of questions and saving to file
-    questions_df.drop_duplicates(subset=['question'], inplace=True)
-    questions_df.to_csv('csv_files/subreddit_finetuning_questions.csv', index=False)
+    # initialize trainer
+    trainer = SFTTrainer(
+        model,
+        train_dataset=data_dict["train"],
+        eval_dataset=data_dict["test"],
+        args=sft_config,
+    )
     
-    return question_df
+    print("starting training")
+    # train model
+    trainer.train()
+
+    return model
+
+
+def get_data() -> dict:
+    # load generated question-answer pairs and shuffle
+    df = pd.read_csv('csv_files/subreddit_finetuning_questions.csv')
+    df = df.sample(frac=1)
+
+    # transform dataframe into dataset
+    data_dict = Dataset.from_pandas(
+        df
+    ).train_test_split(
+        0.01
+    ).map(
+        format_item
+    ).remove_columns(
+        ["question", "subreddit"]
+    )
+    
+    return data_dict
+
+
+# format question-answer pair into content to be fed in to model
+def format_item(item) -> dict:
+    q = item["question"].strip()
+    sub = item["subreddit"].strip()
+    return { "content": f"Question: {q}\nSubreddit: {sub}" }
