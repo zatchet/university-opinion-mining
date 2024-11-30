@@ -2,6 +2,8 @@ llmfinalproj/
 *venv/
 secrets.csv
 finetuned/
+reddit_sa/
+tuning/
 
 .DS_Store
 *.cpython*
