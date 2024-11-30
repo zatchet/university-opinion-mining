@@ -3,9 +3,10 @@ from transformers import BertTokenizer
 from bert_classifier import BERTClassifier
 
 model = BERTClassifier(bert_model_name='bert-base-uncased', num_classes=2)
-model.load_state_dict(torch.load("fact_opinion_classification/bert_classifier.pth", map_location=torch.device('cpu')))
-tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+model.load_state_dict(torch.load("fact_opinion_classification/model.pth", map_location=device))
+tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
+model.to(device)
 
 def predict(text):
     model.eval()
@@ -18,5 +19,5 @@ def predict(text):
         _, preds = torch.max(outputs, dim=1)
     return "fact" if preds.item() == 1 else "opinion"
 
-print(predict('i love zebras'))
+print(predict('i think zebras are awesome'))
 print(predict('zach is a student'))
