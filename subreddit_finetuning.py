@@ -58,7 +58,7 @@ def get_data() -> dict:
     ).map(
         format_item
     ).remove_columns(
-        ["question", "subreddit"]
+        ["question", "college"]
     )
     
     return data_dict
@@ -67,5 +67,5 @@ def get_data() -> dict:
 # format question-answer pair into content to be fed in to model
 def format_item(item) -> dict:
     q = item["question"].strip()
-    sub = item["subreddit"].strip()
-    return { "content": f"Question: {q}\nSubreddit: {sub}" }
+    c = item["college"].strip()
+    return { "content": f"Question: {q}\nCollege: {c}" }

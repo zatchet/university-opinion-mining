@@ -4,6 +4,8 @@ secrets.csv
 finetuned/
 reddit_sa/
 tuning/
+*.ipynb_checkpoints*
+.ipynb_checkpoints/
 
 .DS_Store
 *.cpython*

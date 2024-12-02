@@ -1,6 +1,9 @@
+import os
+# os.chdir('/scratch/bchk/kbengani/reddit_sentiment_analysis/fact_opinion_classification')
+
 import torch
 from transformers import BertTokenizer
-from bert_classifier import BERTClassifier
+from fact_opinion_classification.bert_classifier import BERTClassifier
 
 model = BERTClassifier(bert_model_name='bert-base-uncased', num_classes=2)
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -18,6 +21,3 @@ def predict(text):
         outputs = model(input_ids=input_ids, attention_mask=attention_mask)
         _, preds = torch.max(outputs, dim=1)
     return "fact" if preds.item() == 1 else "opinion"
-
-print(predict('i think zebras are awesome'))
-print(predict('zach is a student'))

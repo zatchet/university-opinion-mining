@@ -18,7 +18,9 @@ Examples:
 Question: Boston Univeristy
 Answer: How do people feel about the dorms at Boston University?
 Question: University of Washington
-Answer: At the University of Washington, do people like the quality of the food?
+Answer: At the udub, do people like the quality of the food?
+Question: Algonquin College
+Answer: Do students at Algonquin like the academic curriculum?
 '''
 
 # convert college subreddits csv to dataframe
@@ -29,7 +31,7 @@ df.drop(columns=['location'], inplace=True)
 def generate_for_benchmark():
     # generating 1 question per college subreddit
     benchmark_df = pd.DataFrame(columns=['subreddit', 'question'])
-    for index, row in df.iterrows():
+    for index, row in tqdm(df.iterrows()):
         messages = [{'role': 'system', 'content': SYSTEM_PROMPT}]
         messages.append({'role': 'user', 'content': row['name']})
 
@@ -40,18 +42,18 @@ def generate_for_benchmark():
             max_tokens=500,
         )
         resp = resp.choices[0].message.content
-        benchmark_df.loc[len(benchmark_df)] = {'subreddit': row['subreddit'], 'question': resp}
+        benchmark_df.loc[len(benchmark_df)] = {'subreddit': row['name'], 'question': resp}
         
     # post-processing of questions and saving to file
     benchmark_df.drop_duplicates(subset=['question'], inplace=True)
-    benchmark_df.to_csv('csv_files/subreddit_finetuning_benchmark.csv', index=False)
+    benchmark_df.to_csv('csv_files/subreddit_benchmark.csv', index=False)
     
     return benchmark_df
 
 
 def generate_for_finetuning(n: int = 5):
     # generating n questions per college subreddit
-    questions_df = pd.DataFrame(columns=['subreddit', 'question'])
+    questions_df = pd.DataFrame(columns=['college', 'question'])
     for index, row in tqdm(df.iterrows()):
         messages = [{'role': 'system', 'content': SYSTEM_PROMPT}]
         messages.append({'role': 'user', 'content': row['name']})
@@ -64,7 +66,7 @@ def generate_for_finetuning(n: int = 5):
                 max_tokens=500,
             )
             resp = resp.choices[0].message.content
-            questions_df.loc[len(questions_df)] = {'subreddit': row['subreddit'], 'question': resp}
+            questions_df.loc[len(questions_df)] = {'college': row['name'], 'question': resp}
 
     # post-processing of questions and saving to file
     questions_df.drop_duplicates(subset=['question'], inplace=True)
