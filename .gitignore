@@ -6,7 +6,9 @@ reddit_sa/
 tuning/
 *.ipynb_checkpoints*
 .ipynb_checkpoints/
+model.pth
 
 .DS_Store
 *.cpython*
 *model/
+__pycache__/

@@ -16,7 +16,7 @@ api_client = praw.Reddit(
 )
 
 # loading college subreddit dataset
-college_subreddits = pd.read_csv('csv_files/college_subreddits.csv')
+college_subreddits = pd.read_csv('data/college_subreddits.csv')
 college_subreddits["name"] = college_subreddits["name"].str.lower()
 
 # initializing system prompt
@@ -31,6 +31,7 @@ Question: Do students at Algonquin College like the academic curriculum?
 Answer: Algonquin College
 '''
 
+# 
 def get_subreddit(question):
     subreddit_name = get_subreddit_name(question)
     if subreddit_name is None:

@@ -20,7 +20,7 @@ def load_data(data_file):
     labels = df['label'].tolist()
     return texts, labels
 
-data_file = "fact_opinion_classification/dataset.tsv"
+data_file = "data/fact_opinion.tsv"
 texts, labels = load_data(data_file)
 
 class TextClassificationDataset(Dataset):

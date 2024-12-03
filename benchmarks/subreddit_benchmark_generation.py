@@ -1,8 +1,11 @@
-import os
 from openai import OpenAI
 import pandas as pd
 from tqdm import tqdm
+
+import os
+os.chdir('..')
 from secret_retriever import retrieve_secret
+os.chdir('benchmarks')
 
 # initializing openai configuration
 BASE_URL = retrieve_secret('cs4973_base_url')
@@ -24,7 +27,7 @@ Answer: Do students at Algonquin like the academic curriculum?
 '''
 
 # convert college subreddits csv to dataframe
-df = pd.read_csv('csv_files/college_subreddits.csv')
+df = pd.read_csv('../data/college_subreddits.csv')
 df.drop(columns=['location'], inplace=True)
 
 
@@ -46,30 +49,6 @@ def generate_for_benchmark():
         
     # post-processing of questions and saving to file
     benchmark_df.drop_duplicates(subset=['question'], inplace=True)
-    benchmark_df.to_csv('csv_files/subreddit_benchmark.csv', index=False)
+    benchmark_df.to_csv('subreddit_benchmark.csv', index=False)
     
     return benchmark_df
-
-
-def generate_for_finetuning(n: int = 5):
-    # generating n questions per college subreddit
-    questions_df = pd.DataFrame(columns=['college', 'question'])
-    for index, row in tqdm(df.iterrows()):
-        messages = [{'role': 'system', 'content': SYSTEM_PROMPT}]
-        messages.append({'role': 'user', 'content': row['name']})
-
-        for _ in range(n):
-            resp = client.chat.completions.create(
-                messages = messages,
-                model = "meta-llama/Meta-Llama-3.1-8B-Instruct",
-                temperature=0.9,
-                max_tokens=500,
-            )
-            resp = resp.choices[0].message.content
-            questions_df.loc[len(questions_df)] = {'college': row['name'], 'question': resp}
-
-    # post-processing of questions and saving to file
-    questions_df.drop_duplicates(subset=['question'], inplace=True)
-    questions_df.to_csv('csv_files/subreddit_finetuning_questions.csv', index=False)
-    
-    return questions_df

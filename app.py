@@ -1,6 +1,5 @@
 import gradio as gr
 from agent import Agent
-import os
 
 FOLLOWUP_PROMPT = "Do you have any follow-up questions? If so, ask them here. Otherwise, type 'no'."
 START_OVER_PROMPT = "Sure! Let's start over. Ask me about public opinion related to a topic in a university."
@@ -10,6 +9,7 @@ NOT_FOUND_RESPONSE = "Could not find any content related to that topic. Please t
 conversation = []
 agent = Agent()
 
+# Define the function to get the sentiment and post
 def get_sentiment_and_post(query):
     url, sentiment = agent.get_sentiment_and_post(query)
     print(query, sentiment, url)
@@ -17,12 +17,11 @@ def get_sentiment_and_post(query):
         agent.conversation = []
         return NOT_FOUND_RESPONSE
     response = f'Sentiment: {sentiment}\n\n[Link to the post]({url})\n\n{FOLLOWUP_PROMPT}'
-    # conversation.append((query, response))
     return response
 
+# Define the function to ask a follow-up question
 def followup_question(question):
     response = f'{agent.followup_question(question)}\n\n{FOLLOWUP_PROMPT}'
-    # conversation.append((question, response))
     return response
 
 # Define the function that interacts with the agent
