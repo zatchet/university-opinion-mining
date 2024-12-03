@@ -1,11 +1,19 @@
 from openai import OpenAI
 import pandas as pd
 from secret_retriever import retrieve_secret
+import praw
+import prawcore
 
 # initializing openai configuration
 BASE_URL = retrieve_secret('cs4973_base_url')
 API_KEY=api_key = retrieve_secret('cs4973_api_key')
 client = OpenAI(base_url=BASE_URL, api_key=API_KEY)
+
+api_client = praw.Reddit(
+    client_id=retrieve_secret('praw_client_id'),
+    client_secret=retrieve_secret('praw_client_secret'),
+    user_agent=retrieve_secret('praw_user_agent')
+)
 
 # loading college subreddit dataset
 college_subreddits = pd.read_csv('csv_files/college_subreddits.csv')
@@ -23,6 +31,19 @@ Question: Do students at Algonquin College like the academic curriculum?
 Answer: Algonquin College
 '''
 
+def get_subreddit(question):
+    subreddit_name = get_subreddit_name(question)
+    if subreddit_name is None:
+        return None
+    subreddit = api_client.subreddit(subreddit_name)
+    try:
+        if subreddit.description is None:
+            # sub does not exist
+            return None
+    except prawcore.exceptions.Redirect as e:
+        # sub does not exist
+        return None
+    return subreddit
 
 def get_subreddit_name(question):
     messages = [{'role': 'system', 'content': SYSTEM_PROMPT}]

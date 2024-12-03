@@ -5,6 +5,8 @@ people
 feel
 community
 opinion
+sentiment
+towards
 ?
 .
 ,

@@ -1,21 +1,24 @@
 from secret_retriever import retrieve_secret
-import praw
-import prawcore
 from openai import OpenAI
+from langchain.text_splitter import CharacterTextSplitter
+from subreddit import get_subreddit_name
+from fact_opinion_classification.classifier import predict
+from subreddit import get_subreddit
 
 # initializing openai configuration
 BASE_URL = retrieve_secret('cs4973_base_url')
 API_KEY=api_key = retrieve_secret('cs4973_api_key')
 client = OpenAI(base_url=BASE_URL, api_key=API_KEY)
 
-from subreddit import get_subreddit_name
-from fact_opinion_classification.classifier import predict
-
-api_client = praw.Reddit(
-    client_id=retrieve_secret('praw_client_id'),
-    client_secret=retrieve_secret('praw_client_secret'),
-    user_agent=retrieve_secret('praw_user_agent')
-)
+def generate_chunks(context_documents):
+    context = '#####'.join(context_documents)
+    text_splitter = CharacterTextSplitter(
+        chunk_size = 500,
+        chunk_overlap = 0,
+        length_function=len,
+        separator = '\n\n'
+    )
+    return text_splitter.split_text(context)
 
 def remove_uni_name(question):
     SYSTEM_PROMPT = """
@@ -38,20 +41,6 @@ def remove_uni_name(question):
     model_response = resp.choices[0].message.content
     return question.replace(model_response, '').strip()
 
-def get_subreddit(question):
-    subreddit_name = get_subreddit_name(question)
-    if subreddit_name is None:
-        return None
-    subreddit = api_client.subreddit(subreddit_name)
-    try:
-        if subreddit.description is None:
-            # sub does not exist
-            return None
-    except prawcore.exceptions.Redirect as e:
-        # sub does not exist
-        return None
-    return subreddit
-
 def process_query(query: str):
     # remove stop words and other words that are not useful
     with open('stopwords.txt', 'r') as f:
@@ -68,10 +57,12 @@ def get_top_post(query: str):
     # posts = subreddit.top(limit=1000)
     # filter out posts with no selftext
     posts = [post for post in posts if post.selftext is not None and len(post.selftext) > 20]
+    if posts == []:
+        return None
     return posts[0]
 
 def get_comments_of_post(post):
-    return post.comments
+    return [comment.body for comment in post.comments if comment.body is not None]
 
 def get_only_opinionated_comments(comments):
     return [comment for comment in comments if predict(comment) == 'opinion']
