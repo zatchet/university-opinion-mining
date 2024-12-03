@@ -1,13 +1,10 @@
-import os
-# os.chdir('/scratch/bchk/kbengani/reddit_sentiment_analysis/fact_opinion_classification')
-
 import torch
 from transformers import BertTokenizer
 from fact_opinion_classification.bert_classifier import BERTClassifier
 
 model = BERTClassifier(bert_model_name='bert-base-uncased', num_classes=2)
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-model.load_state_dict(torch.load("fact_opinion_classification/model.pth", map_location=device))
+model.load_state_dict(torch.load("fact_opinion_classification/model.pth", map_location=device, weights_only=True))
 tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
 model.to(device)
 

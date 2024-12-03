@@ -19,19 +19,7 @@ api_client = praw.Reddit(
 college_subreddits = pd.read_csv('data/college_subreddits.csv')
 college_subreddits["name"] = college_subreddits["name"].str.lower()
 
-# initializing system prompt
-SYSTEM_PROMPT = '''
-Given a question, return the full name of the university the question is asking about.
-Return nothing else.
-
-Examples:
-Question: How do people feel about the dorms at Harvard?
-Answer: Harvard Univeristy
-Question: Do students at Algonquin College like the academic curriculum?
-Answer: Algonquin College
-'''
-
-# 
+# get subreddit given a question
 def get_subreddit(question):
     subreddit_name = get_subreddit_name(question)
     if subreddit_name is None:
@@ -46,8 +34,20 @@ def get_subreddit(question):
         return None
     return subreddit
 
+# get subreddit name given a question by getting college name and then mapping to subreddit
 def get_subreddit_name(question):
-    messages = [{'role': 'system', 'content': SYSTEM_PROMPT}]
+    # initializing system prompt
+    college_retrieval_system_prompt = '''
+    Given a question, return the full name of the university the question is asking about.
+    Return nothing else.
+
+    Examples:
+    Question: How do people feel about the dorms at Harvard?
+    Answer: Harvard Univeristy
+    Question: Do students at Algonquin College like the academic curriculum?
+    Answer: Algonquin College
+    '''
+    messages = [{'role': 'system', 'content': college_retrieval_system_prompt}]
     messages.append({'role': 'user', 'content': f'Question: {question}'})
 
     for _ in range(5):

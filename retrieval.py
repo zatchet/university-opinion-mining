@@ -33,7 +33,7 @@ def process_query(query: str):
 
 # remove the name of the university from the question
 def remove_uni_name(question):
-    REMOVE_UNI_SYSTEM_PROMPT = """
+    remove_uni_system_prompt = """
     Given the question, return the name of the university or college that is being asked about.
     Return exactly as it appears in the question.
 
@@ -44,7 +44,7 @@ def remove_uni_name(question):
     """
     question = question.lower()
 
-    messages = [{'role': 'system', 'content': REMOVE_UNI_SYSTEM_PROMPT}]
+    messages = [{'role': 'system', 'content': remove_uni_system_prompt}]
     messages.extend([{'role': 'user', 'content': question}])
 
     for _ in range(5):
