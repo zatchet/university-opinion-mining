@@ -57,7 +57,6 @@ class Agent:
             messages = [{'role': 'system', 'content': followup_system_prompt}] + self.conversation,
             model = "meta-llama/Meta-Llama-3.1-8B-Instruct",
             temperature=0.7)
-
         
         response = resp.choices[0].message.content
         self.conversation.append({'role': 'assistant', 'content': response})

@@ -1,7 +1,6 @@
 from secret_retriever import retrieve_secret
 from openai import OpenAI
 from langchain.text_splitter import CharacterTextSplitter
-from subreddit import get_subreddit_name
 from fact_opinion_classification.classifier import predict
 from subreddit import get_subreddit
 
