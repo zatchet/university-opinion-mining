@@ -45,7 +45,7 @@ def generate_for_benchmark():
             max_tokens=500,
         )
         resp = resp.choices[0].message.content
-        benchmark_df.loc[len(benchmark_df)] = {'subreddit': row['name'], 'question': resp}
+        benchmark_df.loc[len(benchmark_df)] = {'subreddit': row['subreddit'], 'question': resp}
         
     # post-processing of questions and saving to file
     benchmark_df.drop_duplicates(subset=['question'], inplace=True)
