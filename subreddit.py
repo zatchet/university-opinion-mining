@@ -43,7 +43,7 @@ def get_subreddit_name(question):
 
     Examples:
     Question: How do people feel about the dorms at Harvard?
-    Answer: Harvard Univeristy
+    Answer: Harvard University
     Question: Do students at Algonquin College like the academic curriculum?
     Answer: Algonquin College
     '''
