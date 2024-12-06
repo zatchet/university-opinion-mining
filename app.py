@@ -12,7 +12,6 @@ agent = Agent()
 # Define the function to get the sentiment and post
 def get_sentiment_and_post(query):
     url, sentiment = agent.get_sentiment_and_post(query)
-    print(query, sentiment, url)
     if url is None:
         agent.conversation = []
         return NOT_FOUND_RESPONSE

@@ -37,7 +37,6 @@ class Agent:
         messages.extend([{'role': 'user', 'content': chunk} for chunk in chunked_post])
         messages.extend([{'role': 'user', 'content': f'QUESTION: {query}'}])
 
-        # print("HERE")
         resp = client.chat.completions.create(
             messages = messages,
             model = "meta-llama/Meta-Llama-3.1-8B-Instruct",
